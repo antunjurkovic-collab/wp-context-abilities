@@ -1,4 +1,4 @@
-# WP Context Abilities
+﻿# WP Context Abilities
 
 WP Context Abilities exposes read-only structured WordPress context for AI workflows through REST and, when available, the WordPress Abilities API.
 
@@ -108,6 +108,18 @@ add_filter('wpca_cid_exclude_keys', function(array $keys) {
 });
 ```
 
+
+## Live Validation Script
+
+Run the live validation script against a WordPress install with the plugin active:
+
+```powershell
+$env:WPCA_APP_PASSWORD = 'application-password-without-spaces-or-with-spaces'
+.\scripts\validate-live.ps1 -BaseUrl 'https://example.com' -User 'admin-user'
+```
+
+The script verifies REST routes, removed route 404s, validators, Abilities discovery, and ability execution through `input[...]`.
+
 ## Install
 
 1. Copy `wp-context-abilities/` into `wp-content/plugins/`.
@@ -140,3 +152,4 @@ Public proposal name:
 This plugin is not an agent runtime, not a replacement for REST, not a mutation layer, and not a general WordPress state engine. It is a small WordPress-native context primitive for AI features and tools.
 
 AST alignment is secondary and future-facing. The current package is AST-inspired, not a full AST implementation.
+
