@@ -109,6 +109,11 @@ add_filter('wpca_cid_exclude_keys', function(array $keys) {
 ```
 
 
+
+## Agent-Readable Guidance
+
+This repo includes `AGENTS.md` and `docs/AGENT-USAGE.md` so agents can discover the current REST-first, Application-Password-compatible surface without guessing deprecated routes or mutation endpoints.
+
 ## Live Validation Script
 
 Run the live validation script against a WordPress install with the plugin active:
