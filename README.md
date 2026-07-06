@@ -110,6 +110,11 @@ add_filter('wpca_cid_exclude_keys', function(array $keys) {
 
 
 
+
+## Proposal
+
+See `docs/WORDPRESS-AI-CONTEXT-ABILITIES-PROPOSAL.md` for the focused WordPress AI proposal: REST-first, Application-Password-compatible, read-only structured content context plus optional Abilities API registration.
+
 ## Agent-Readable Guidance
 
 This repo includes `AGENTS.md` and `docs/AGENT-USAGE.md` so agents can discover the current REST-first, Application-Password-compatible surface without guessing deprecated routes or mutation endpoints.
