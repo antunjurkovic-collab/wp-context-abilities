@@ -128,6 +128,12 @@ per_page=<n>
 
 This lets tools avoid crawling the entire site repeatedly.
 
+### Cursor Semantics
+
+The reference implementation currently treats `cursor` as a high-water mark for changed-content discovery, not as a next-page cursor. Clients should page through a fixed `since` window completely before storing the highest returned cursor for the next incremental sync.
+
+This should be reviewed if WordPress AI tooling standardizes a context discovery surface, because next-page pagination and high-water incremental sync are different contracts.
+
 ## Non-Goals
 
 This proposal is not:

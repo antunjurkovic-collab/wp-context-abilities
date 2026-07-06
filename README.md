@@ -1,4 +1,4 @@
-﻿# WP Context Abilities
+# WP Context Abilities
 
 WP Context Abilities exposes read-only structured WordPress context for AI workflows through REST and, when available, the WordPress Abilities API.
 
@@ -56,6 +56,18 @@ Query parameters:
 - `types=post,page`
 - `per_page=1..100`
 - `page=1..n`
+
+### Cursor Semantics
+
+`cursor` is a high-water mark for the newest `modified` timestamp returned in the current response. It is not a next-page cursor.
+
+Correct incremental sync pattern:
+
+1. Choose a fixed `since` timestamp for the sync window.
+2. Page through all results with that same `since` using `page=1..n` until no more items are returned.
+3. Store the highest returned `cursor` as the next sync high-water mark only after the full window has been drained.
+
+Do not request page 1, immediately store its `cursor`, and then use that cursor for the next request while older pages from the same window still exist; that can skip older changed items.
 
 ## Abilities API
 
@@ -162,4 +174,3 @@ Public proposal name:
 This plugin is not an agent runtime, not a replacement for REST, not a mutation layer, and not a general WordPress state engine. It is a small WordPress-native context primitive for AI features and tools.
 
 AST alignment is secondary and future-facing. The current package is AST-inspired, not a full AST implementation.
-

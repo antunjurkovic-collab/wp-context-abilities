@@ -223,7 +223,7 @@ class WPCA_Abilities {
                 ),
                 'cursor' => array(
                     'type' => 'string',
-                    'description' => $require_since ? 'Cursor returned by a previous catalog response. Required when since is not supplied.' : 'Optional cursor returned by a previous catalog response.',
+                    'description' => $require_since ? 'High-water cursor returned by a previous fully drained catalog window. Required when since is not supplied.' : 'Optional high-water cursor returned by a previous fully drained catalog window.',
                 ),
                 'status' => array(
                     'type' => 'string',
@@ -321,6 +321,3 @@ class WPCA_Abilities {
         );
     }
 }
-
-
-

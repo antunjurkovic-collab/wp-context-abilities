@@ -1,4 +1,4 @@
-﻿# Agent Usage
+# Agent Usage
 
 WP Context Abilities gives agents a small read-only WordPress context surface. The intended access pattern is Application Password authentication against REST and WordPress Abilities API endpoints.
 
@@ -47,6 +47,26 @@ If-None-Match: "sha256-..."
 ```
 
 `304 Not Modified` means the cached representation is still current.
+
+## Cursor / Incremental Sync
+
+The `cursor` value is a high-water mark for the newest `modified` timestamp returned in a response. It is not a next-page cursor.
+
+Safe sync pattern:
+
+1. Start from a fixed `since` timestamp.
+2. Fetch all pages for that same `since` value.
+3. After the full result window is drained, store the highest returned `cursor` for the next sync.
+
+Unsafe pattern:
+
+```text
+GET catalog?since=T&page=1
+store response.cursor immediately
+GET catalog?cursor=response.cursor
+```
+
+That can skip older changed items that were on later pages of the original `since=T` window.
 
 ## Abilities Calls
 
