@@ -1,7 +1,7 @@
-﻿# WordPress AI Context Abilities Proposal
+# WordPress AI Context Abilities Proposal
 
-Status: proposal / reference implementation note  
-Repository: `wp-context-abilities`  
+Status: public draft / discussion artifact
+Repository: `wp-context-abilities`
 Reference implementation version: `0.1.0`
 
 ## Summary
@@ -201,15 +201,19 @@ failed: 0
 ok: true
 ```
 
-## Suggested Discussion Question
+## Discussion Prompts
 
-Should WordPress AI tooling define a small read-only Structured Content Context Ability pattern, based on authenticated REST and optional Abilities API registration, so agents can retrieve current post/page context without guessing routes or depending on stale model knowledge?
+These prompts are included for external reviewers. They are not instructions, commitments, or implementation requirements.
 
-## Suggested Next Step
+Primary discussion question:
 
-Use this reference implementation as a discussion artifact, not as a request for immediate core merge.
+> Should WordPress AI tooling define a small read-only Structured Content Context Ability pattern, based on authenticated REST and optional Abilities API registration, so agents can retrieve current post/page context without guessing routes or depending on stale model knowledge?
 
-Useful review questions:
+How to use this draft:
+
+> Treat this reference implementation as a discussion artifact, not as a request for immediate core merge.
+
+Review prompts:
 
 - Is the route/ability surface too small, too broad, or about right for v0?
 - Should post/page context be the first standardized context surface?
