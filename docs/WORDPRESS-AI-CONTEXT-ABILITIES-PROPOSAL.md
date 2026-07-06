@@ -3,6 +3,7 @@
 Status: public draft / discussion artifact
 Repository: `wp-context-abilities`
 Reference implementation version: `0.1.0`
+Public discussion: https://github.com/WordPress/ai/discussions/835
 
 ## Summary
 

@@ -120,8 +120,11 @@ add_filter('wpca_cid_exclude_keys', function(array $keys) {
 });
 ```
 
+## Public Discussion
 
+This proposal is being discussed in WordPress AI Discussions:
 
+https://github.com/WordPress/ai/discussions/835
 
 ## Proposal
 
