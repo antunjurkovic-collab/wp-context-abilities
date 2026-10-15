@@ -1,0 +1,340 @@
+{
+  "scope": "Focused If-None-Match parser correction; real WordPress REST/parser classes with in-memory database and host doubles. No HTTP server or hosted requests.",
+  "created_at_utc": "2026-10-15T21:34:31.519463+00:00",
+  "source_head": "71894926f0ae14d309a23153a858d9699475327f",
+  "source_state": "Uncommitted local 0.1.1 candidate; exact runtime and test bytes are bound below.",
+  "php_version": "8.4.6",
+  "php_executable_sha256": "68c6a7163990abd4d014dd1230c03b4664e228a49a97f01b12b6f7c891e542ad",
+  "command": "php tests/run-regressions.php <cached-wordpress-source-root>",
+  "runtime_sha256": {
+    "wp-context-abilities.php": "24704f3d61eb2f384d7db48ec2ad688dee9e643133640ede347d04283a0e8e0f",
+    "includes/class-wpca-abilities.php": "240abdbc0b9187db29c44228e9b85c4b98152cf38a0475c217ce841fddd0db78",
+    "includes/class-wpca-cid.php": "a3afb9cf4e6dd864fb757fe2ff22550b921e3e041897850e0e2db7c7d6998b08",
+    "includes/class-wpca-mr.php": "e322e320ae6169a082428e71a65677ea1d10beb283e4a47b9bff0680a40998d1",
+    "includes/class-wpca-rest.php": "cc252464cc5386ece7bc30a77dc93077c8f93b6771f2f7ee193d694ed86d269b"
+  },
+  "test_sha256": {
+    "tests/run-regressions.php": "4135c0c48fd446c454fb57e1199ee9d8c1a073d68fd337298f8599fc82423dde",
+    "tests/wordpress-fixture.php": "4ed951c22e00c173fcca1ee7c88fead3fa7eae0649e0a1223f00361e7705ed40",
+    "tests/run-docker.py": "4fb8b5923e3981eace12a0ce1c4298e3cd25a937a4731ff61dfbcb4831f102a1"
+  },
+  "wordpress_source_sha256": {
+    "wp-includes/class-wp-error.php": "a9e971548bf6a1d93c821f980f530efba985c25d5d0b13d9b63e63b378a81a94",
+    "wp-includes/class-wp-post.php": "6006f7114154e87c0d7b974cb4dbbea1362a69808911d775d75b1a5579f674dd",
+    "wp-includes/class-wp-http-response.php": "6d2a98f222a7b45812cc549b7f32f330aa9389f5ef0d4870987a64c0ae4d4895",
+    "wp-includes/rest-api/class-wp-rest-response.php": "871f3554e71c96c5965ac331fbe0912bb3253f6ecaa88ce6fc9870d06706fdf1",
+    "wp-includes/rest-api/class-wp-rest-request.php": "8d2f61dcafedacad262118874665291c6ced87b231479d9f18fcc58c06508b09",
+    "wp-includes/rest-api/class-wp-rest-server.php": "370a510299f711b517bee936402e7404c82d130056570a4ed29f48b6a177bc6c",
+    "wp-includes/class-wp-block-parser-block.php": "7e21f483cf0c9deddd2144e026842bf906c72983908f7bd163c0716e8f6f325e",
+    "wp-includes/class-wp-block-parser-frame.php": "3a66c88fa2397a842884908d83d1d03e5cb9cfb23fbb6d3cdf573bcd1520f0ae",
+    "wp-includes/class-wp-block-parser.php": "49fa9b16292e4407c591f292f2515c007b0784c594dd978212ee5faccb499420"
+  },
+  "regressions": {
+    "ok": true,
+    "checks": 69,
+    "failed": 0,
+    "scope": "Real WordPress REST/parser classes with in-memory database/host doubles; no hosted requests.",
+    "results": [
+      {
+        "name": "json_body_identity",
+        "ok": true
+      },
+      {
+        "name": "http_etag_is_not_application_cid",
+        "ok": true
+      },
+      {
+        "name": "link_only_change_keeps_application_cid",
+        "ok": true
+      },
+      {
+        "name": "link_only_change_returns_200_with_new_etag",
+        "ok": true
+      },
+      {
+        "name": "changed_body_digest_matches",
+        "ok": true
+      },
+      {
+        "name": "unchanged_strong_304",
+        "ok": true
+      },
+      {
+        "name": "unchanged_weak_304",
+        "ok": true
+      },
+      {
+        "name": "unchanged_list_304",
+        "ok": true
+      },
+      {
+        "name": "unchanged_wildcard_304",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_quoted_comma_wildcard_200",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_weak_quoted_comma_wildcard_200",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_quoted_comma_current_tag_200",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_weak_quoted_comma_current_tag_200",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_quoted_wildcard_200",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_bare_current_tag_200",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_wildcard_before_tag_200",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_wildcard_after_tag_200",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_matched_then_unterminated_tag_200",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_matched_then_adjacent_tag_200",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_spaced_weak_prefix_200",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_lowercase_weak_prefix_200",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_quoted_comma_before_304",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_quoted_comma_before_weak_304",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_quoted_comma_after_304",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_ows_and_empty_members_304",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_empty_opaque_before_304",
+        "ok": true
+      },
+      {
+        "name": "if_none_match_literal_backslash_before_304",
+        "ok": true
+      },
+      {
+        "name": "pretty_matches_actual_core_serializer",
+        "ok": true
+      },
+      {
+        "name": "pretty_has_different_etag_and_200",
+        "ok": true
+      },
+      {
+        "name": "pretty_digest_matches_served_bytes",
+        "ok": true
+      },
+      {
+        "name": "pretty_revalidation_304",
+        "ok": true
+      },
+      {
+        "name": "head_identity_without_body",
+        "ok": true
+      },
+      {
+        "name": "late_response_filter_applied_once",
+        "ok": true
+      },
+      {
+        "name": "late_response_change_prevents_304",
+        "ok": true
+      },
+      {
+        "name": "custom_encoding_options_match_core",
+        "ok": true
+      },
+      {
+        "name": "custom_encoding_digest_matches",
+        "ok": true
+      },
+      {
+        "name": "earlier_serve_filter_included_in_identity",
+        "ok": true
+      },
+      {
+        "name": "_jsonp_delegated_without_misleading_identity",
+        "ok": true
+      },
+      {
+        "name": "_envelope_delegated_without_misleading_identity",
+        "ok": true
+      },
+      {
+        "name": "already_served_response_not_overwritten",
+        "ok": true
+      },
+      {
+        "name": "error_not_converted_to_304",
+        "ok": true
+      },
+      {
+        "name": "encoding_failure_delegated_without_identity",
+        "ok": true
+      },
+      {
+        "name": "editable_post_permission_preserved",
+        "ok": true
+      },
+      {
+        "name": "noneditable_post_permission_preserved",
+        "ok": true
+      },
+      {
+        "name": "real_parser_list_items_preserved",
+        "ok": true
+      },
+      {
+        "name": "list_items_not_duplicated",
+        "ok": true
+      },
+      {
+        "name": "list_plain_text_preserved",
+        "ok": true
+      },
+      {
+        "name": "markdown_digest_matches",
+        "ok": true
+      },
+      {
+        "name": "markdown_revalidation_304",
+        "ok": true
+      },
+      {
+        "name": "nested_ordered_list_preserves_hierarchy",
+        "ok": true
+      },
+      {
+        "name": "nested_children_not_duplicated",
+        "ok": true
+      },
+      {
+        "name": "nested_list_identity_matches",
+        "ok": true
+      },
+      {
+        "name": "legacy_list_preserved",
+        "ok": true
+      },
+      {
+        "name": "markdown_filters_included_in_bytes",
+        "ok": true
+      },
+      {
+        "name": "empty_permission_filtered_page_continues",
+        "ok": true
+      },
+      {
+        "name": "later_accessible_post_is_discoverable",
+        "ok": true
+      },
+      {
+        "name": "query_exhaustion_terminates",
+        "ok": true
+      },
+      {
+        "name": "stable_tie_break_order",
+        "ok": true
+      },
+      {
+        "name": "catalog_does_not_label_cid_http_validator",
+        "ok": true
+      },
+      {
+        "name": "catalog_digest_matches",
+        "ok": true
+      },
+      {
+        "name": "short_query_page_terminates",
+        "ok": true
+      },
+      {
+        "name": "dependency_change_is_not_a_post_change_feed",
+        "ok": true
+      },
+      {
+        "name": "ability_cid_not_mislabelled_http_etag",
+        "ok": true
+      },
+      {
+        "name": "ability_empty_page_has_continuation",
+        "ok": true
+      },
+      {
+        "name": "ability_schema_requires_continuation",
+        "ok": true
+      },
+      {
+        "name": "core_serving_pipeline_emits_one_json_document",
+        "ok": true
+      },
+      {
+        "name": "core_serving_pipeline_digest_matches",
+        "ok": true
+      },
+      {
+        "name": "core_serving_pipeline_304_no_body",
+        "ok": true
+      },
+      {
+        "name": "core_serving_pipeline_markdown_not_json_encoded",
+        "ok": true
+      }
+    ]
+  },
+  "parser_case_count": 18,
+  "regression_exit_code": 0,
+  "regression_stderr_empty": true,
+  "php_lint": {
+    "includes/class-wpca-rest.php": true,
+    "tests/run-regressions.php": true
+  },
+  "docker_runner_python_syntax_valid": true,
+  "git_diff_check_passed": true,
+  "runtime_test_and_wordpress_source_unchanged_during_validation": true,
+  "historical_summary_sha256": {
+    "evidence/docker-fidelity-correction-20261015-final/summary.json": "5875f0ebb382dc30e00ae3b2c8d964d3146fcec2ac6a9ba861be6e676a0e90ed",
+    "evidence/editorial-fidelity-correction-20261015/summary.json": "d9ad3199bdc27e1ea19a2511d12ebcc2e99f008a02d41c2b2b95d39c0077abde",
+    "evidence/model-editorial-comparison-20261015-complete/summary.json": "1569c2a3bc51ba58e28a6c7c9f4e9d009d37bcba7408e13b33ca832c44dee27c"
+  },
+  "historical_summaries_unchanged": true,
+  "non_claims": [
+    "No Docker, model, hosted, or full WordPress installation rerun for this correction.",
+    "Earlier Docker and model reports bind the pre-correction runtime, not the changed parser.",
+    "No complete block/link fidelity, complete change discovery, improved AI review quality, or real-world integration-effort benefit is established.",
+    "List-item link destinations remain outside the implemented link-preservation scope.",
+    "No commit, package acceptance, freeze, release, or deployment is performed."
+  ],
+  "ok": true
+}

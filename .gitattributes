@@ -1,0 +1,4 @@
+# Preserve the reviewed source, test, and evidence bytes across checkouts.
+*.php -text whitespace=cr-at-eol
+tests/*.py -text whitespace=cr-at-eol
+evidence/** -text

@@ -2,12 +2,14 @@
 
 Status: public draft / discussion artifact
 Repository: `wp-context-abilities`
-Reference implementation version: `0.1.0`
+Reference implementation version: `0.1.1` (locally tested; not hosted validation)
 Public discussion: https://github.com/WordPress/ai/discussions/835
 
 ## Summary
 
-WordPress AI tools need a small, authenticated, read-only way to retrieve current WordPress content context without relying on broad scraping, stale model knowledge, custom MCP surfaces, or mutation-capable APIs.
+This experiment tests whether a shared, authenticated WordPress content projection
+reduces duplicated consumer-side normalization. Existing WordPress REST content
+APIs and `core/content-query` are valid comparison baselines, not missing facilities.
 
 This proposal defines a narrow pattern:
 
@@ -25,9 +27,25 @@ Agents often need to answer questions such as:
 - Has this content changed since the agent last fetched it?
 - Can the agent revalidate cached context with an `ETag` instead of refetching everything?
 
-Today, an agent may guess routes, scrape rendered HTML, rely on stale training data, or use broad integration surfaces that are not specific to WordPress permissions and validators.
+The proposed benefit is consistent projection and conditional retrieval. A
+small editorial pilot found equal factual accuracy; a broader quality benefit
+over existing APIs remains unestablished.
 
-A small REST-first context surface can reduce that ambiguity.
+A local synthetic retrieval comparison on 2026-10-15 found that Core REST with
+`_fields` and `_embed` supplied all 13 expected editorial facts in one request.
+The initial context projection lost three details; correcting image alt text,
+caption, and paragraph link handling restored all 13. Core returned 5,701 body
+bytes and context JSON returned 2,003, each in one request. Conditional context
+requests returned 304 with no body. Consumer normalization produced identical
+556-byte fact objects from either source. This establishes retrieval behavior
+for that fixture.
+
+A subsequent pilot gave the same editorial instructions to three fresh
+`gpt-6.1-sol` runs using Core REST JSON, context JSON, and normalized context.
+With one completion per input, each recovered all 13 facts correctly; all nine quoted passages were present
+in its supplied context. Observations were comparable and recommended clearer
+checklist completion criteria. This one-fixture pilot does not establish a
+general quality advantage for an additional ability surface.
 
 ## Design Principles
 
@@ -38,15 +56,16 @@ A small REST-first context surface can reduce that ambiguity.
 2. Read-only by default
    - Context retrieval must not mutate WordPress content.
    - No write, suggestion-apply, snapshot-write, or block-update route is included in v0.
+   - This does not make the supplied Application Password read-only across WordPress; other endpoints retain the user's applicable authority.
 
 3. Abilities API aligned
    - When the WordPress Abilities API is available, register discoverable read-only abilities.
    - Abilities describe the context operations, but REST remains the transport.
 
 4. Validator-aware
-   - Return strong `ETag` values for machine representations.
+   - Compute ordinary GET response ETags from the emitted bytes, independently of the application CID.
    - Support `If-None-Match` and `304 Not Modified`.
-   - Include `Content-Digest` where possible.
+   - Hash and emit one serialization for `Content-Digest`; HEAD/304 omit it and JSONP/envelope wrappers receive no plugin-generated validators.
 
 5. Permissioned
    - Use WordPress capabilities such as `edit_post` and `edit_posts`.
@@ -54,7 +73,7 @@ A small REST-first context surface can reduce that ambiguity.
 
 6. Small enough to evaluate
    - The surface should be compact and testable.
-   - A validator script should be able to prove route availability, removed-route absence, validators, and ability execution.
+   - Distinguish route/ability smoke checks from byte-integrity, fidelity, and agent-effectiveness tests.
 
 ## Proposed v0 Surface
 
@@ -108,7 +127,7 @@ The post/page Machine Representation should include enough context for AI tools 
 - text projection
 - word count
 - representation links
-- content-addressed validator / CID-style hash
+- application CID, separate from the HTTP representation validator
 
 The exact schema can evolve, but it should remain deterministic and permissioned.
 
@@ -127,11 +146,19 @@ since=<ISO timestamp>
 per_page=<n>
 ```
 
-This lets tools avoid crawling the entire site repeatedly.
+This filters post-modification timestamps; it is not a complete context change feed.
 
 ### Cursor Semantics
 
-The reference implementation currently treats `cursor` as a high-water mark for changed-content discovery, not as a next-page cursor. Clients should page through a fixed `since` window completely before storing the highest returned cursor for the next incremental sync.
+The reference implementation treats `cursor` as a timestamp high-water mark, not
+as a next-page cursor. Clients follow `next_page` until null while keeping `since`
+and other filters fixed, including across empty permission-filtered pages. The
+highest returned timestamp is only a subsequent post-modification filter.
+
+Offset pagination can shift under concurrent changes. Deletions, permission
+changes, timestamp ties, and related author/taxonomy/image metadata updates are
+not a complete change log. No zero-miss synchronization or embedding freshness
+guarantee is claimed.
 
 This should be reviewed if WordPress AI tooling standardizes a context discovery surface, because next-page pagination and high-water incremental sync are different contracts.
 
@@ -151,23 +178,6 @@ This proposal is not:
 
 It is intentionally narrow: authenticated read-only content context for WordPress AI workflows.
 
-## Relationship To Skills And Agent Guidance
-
-Agent skills can help when they are current, targeted, and evaluated. But a skill alone cannot provide live WordPress state.
-
-This proposal separates two concerns:
-
-- `AGENTS.md` and documentation tell an agent how to use the current surface.
-- REST and Abilities endpoints provide the live permissioned context.
-
-The reference implementation includes both:
-
-- `AGENTS.md`
-- `docs/AGENT-USAGE.md`
-- `scripts/validate-live.ps1`
-
-This keeps agent guidance small, current, and testable.
-
 ## Reference Implementation
 
 The `wp-context-abilities` plugin is a narrow reference implementation of this proposal.
@@ -186,7 +196,7 @@ The plugin intentionally excludes older experimental surfaces such as snapshot r
 
 ## Live Validation
 
-The reference implementation has been validated on a live WordPress install at `llmpages.org`.
+The original 0.1.0 reference implementation had a hosted smoke run.
 
 Validation coverage:
 
@@ -200,7 +210,7 @@ Validation coverage:
 - `wp-context` Abilities category is discoverable
 - all four read-only abilities execute with `input[...]`
 
-Latest validator result at the time of this note:
+Historical smoke result, retained without extending its scope:
 
 ```text
 checks: 27
@@ -208,23 +218,29 @@ failed: 0
 ok: true
 ```
 
-## Discussion Prompts
+Those checks established header presence and route/ability behavior, not digest
+correctness, projection fidelity, complete discovery, or better AI outcomes.
+The local 0.1.1 corrections separate HTTP validators from CIDs, retain modern list
+items and image/link details in Markdown, expose explicit pagination continuation, and serialize/hash
+ordinary response bytes once, including pretty-printing and final data filters.
+Later output-buffer, compression, or intermediary transformations are outside
+that byte-identity boundary and must update/remove affected headers themselves.
+There is no new hosted validation. The local one-fixture model pilot found equal
+factual accuracy, with no independent human quality rating or broader model
+benchmark.
 
-These prompts are included for external reviewers. They are not instructions, commitments, or implementation requirements.
+## Evaluation Boundary
 
-Primary discussion question:
+The reference implementation demonstrates reusable normalization and conditional
+retrieval on one synthetic editorial fixture. Core REST supplied all expected
+facts in one request, so no request-count advantage over that baseline was
+shown. Better AI review quality and reduced real-world integration effort
+remain unestablished. The WordPress AI `core/content-query` ability was not part
+of this comparison.
 
-> Should WordPress AI tooling define a small read-only Structured Content Context Ability pattern, based on authenticated REST and optional Abilities API registration, so agents can retrieve current post/page context without guessing routes or depending on stale model knowledge?
+Link-target preservation currently covers paragraphs, headings, and quotes, not
+list items. Timestamp-filtered discovery is not a complete change feed. These
+results do not establish inclusion of the proposed ability list in WordPress AI.
 
-How to use this draft:
-
-> Treat this reference implementation as a discussion artifact, not as a request for immediate core merge.
-
-Review prompts:
-
-- Is the route/ability surface too small, too broad, or about right for v0?
-- Should post/page context be the first standardized context surface?
-- Which fields belong in a stable Machine Representation?
-- Should Markdown projection be part of the same surface or separate?
-- What should the recommended permission model be for AI tools using Application Passwords?
-- What eval would prove this improves agent behavior compared with generic docs or skills alone?
+The [public results summary](../evidence/public-0.1.1/summary.json) distinguishes
+the current parser regressions from the historical Docker and model runs.

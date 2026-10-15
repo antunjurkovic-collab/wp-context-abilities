@@ -7,6 +7,61 @@ require_once __DIR__ . '/class-wpca-cid.php';
 class WPCA_REST {
     public static function init() {
         add_action('rest_api_init', array(__CLASS__, 'register_routes'));
+        add_filter('rest_pre_serve_request', array(__CLASS__, 'serve_response'), PHP_INT_MAX, 4);
+    }
+
+    public static function serve_response($served, $result, $request, $server) {
+        if ($served || !($request instanceof WP_REST_Request) ||
+            !($result instanceof WP_REST_Response) || $result->get_status() !== 200 ||
+            !in_array($request->get_method(), array('GET', 'HEAD'), true) ||
+            !preg_match('#^/wp-context/v1/(catalog|posts/[0-9]+(?:/md)?)$#D', $request->get_route())) {
+            return $served;
+        }
+
+        // Core owns these wrappers; do not attach a validator for an unwrapped body.
+        if ($request->has_param('_jsonp') || $request->has_param('_envelope')) {
+            return $served;
+        }
+
+        $embed = $request->has_param('_embed') ? rest_parse_embed_param($request->get_param('_embed')) : false;
+        $data = $server->response_to_data($result, $embed);
+        $data = apply_filters('rest_pre_echo_response', $data, $server, $request);
+        if ($data === null) {
+            return $served;
+        }
+
+        $headers = $result->get_headers();
+        $content_type = isset($headers['Content-Type']) ? $headers['Content-Type'] : '';
+        $markdown = is_string($data) && stripos($content_type, 'text/markdown') === 0;
+        if ($markdown) {
+            $body = $data;
+        } else {
+            $options = $request->has_param('_pretty') ? JSON_PRETTY_PRINT : 0;
+            $options = apply_filters('rest_json_encode_options', $options, $request);
+            $body = wp_json_encode($data, $options);
+            if ($body === false) {
+                return $served;
+            }
+            $server->send_header('Content-Type', stripos($content_type, 'application/json') === 0 ? $content_type : 'application/json; charset=UTF-8');
+        }
+
+        // Hash and emit one serialization, after Core's final data/encoding filters.
+        $digest = hash('sha256', $body, true);
+        $etag = 'sha256-' . bin2hex($digest);
+        $server->send_header('ETag', '"' . $etag . '"');
+        if (self::if_none_match($request, $etag)) {
+            status_header(304);
+            $server->remove_header('Content-Digest');
+            return true;
+        }
+
+        if ($request->get_method() === 'HEAD') {
+            $server->remove_header('Content-Digest');
+            return true;
+        }
+        $server->send_header('Content-Digest', 'sha-256=:' . base64_encode($digest) . ':');
+        echo $body;
+        return true;
     }
 
     public static function register_routes() {
@@ -57,14 +112,8 @@ class WPCA_REST {
         $cid = WPCA_CID::compute($mr);
         $mr['cid'] = $cid;
 
-        if (self::if_none_match($req, $cid)) {
-            $resp = new WP_REST_Response(null, 304);
-            self::add_context_headers($resp, $cid, $mr['modified'] ?? null, 'application/json; profile="' . WPCA_PROFILE . '"');
-            return $resp;
-        }
-
         $resp = new WP_REST_Response($mr, 200);
-        self::add_context_headers($resp, $cid, $mr['modified'] ?? null, 'application/json; profile="' . WPCA_PROFILE . '"');
+        self::add_context_headers($resp, $mr['modified'] ?? null, 'application/json; profile="' . WPCA_PROFILE . '"');
         return $resp;
     }
 
@@ -77,10 +126,8 @@ class WPCA_REST {
 
         $md = self::to_markdown($mr);
         $md = apply_filters('wpca_markdown', $md, $mr, $req);
-        $etag = 'sha256-' . hash('sha256', $md);
-
-        $resp = new WP_REST_Response(self::if_none_match($req, $etag) ? null : $md, self::if_none_match($req, $etag) ? 304 : 200);
-        self::add_context_headers($resp, $etag, $mr['modified'] ?? null, 'text/markdown; charset=UTF-8');
+        $resp = new WP_REST_Response($md, 200);
+        self::add_context_headers($resp, $mr['modified'] ?? null, 'text/markdown; charset=UTF-8');
         return $resp;
     }
 
@@ -118,8 +165,7 @@ class WPCA_REST {
             'post_status' => $post_status,
             'posts_per_page' => $per_page,
             'paged' => $page,
-            'orderby' => 'modified',
-            'order' => 'DESC',
+            'orderby' => array('modified' => 'DESC', 'ID' => 'DESC'),
             'fields' => 'ids',
             'no_found_rows' => true,
             'update_post_term_cache' => false,
@@ -136,6 +182,8 @@ class WPCA_REST {
         }
 
         $ids = get_posts(apply_filters('wpca_catalog_args', $args, $req));
+        // A full query page may yield no editable items. Continue independently of count.
+        $next_page = count($ids) >= $per_page ? $page + 1 : null;
         $items = array();
         $max_modified_iso = null;
 
@@ -171,7 +219,6 @@ class WPCA_REST {
                     array(
                         'role' => 'machine_projection',
                         'url' => $mr_url,
-                        'validator' => $cid,
                     ),
                 ),
             );
@@ -186,6 +233,7 @@ class WPCA_REST {
             'cursor' => $max_modified_iso,
             'page' => $page,
             'per_page' => $per_page,
+            'next_page' => $next_page,
             'items' => $items,
         );
     }
@@ -201,12 +249,12 @@ class WPCA_REST {
             $type = isset($blk['type']) ? $blk['type'] : '';
             if ($type === 'core/heading') {
                 $lvl = isset($blk['level']) ? max(1, min(6, (int) $blk['level'])) : 2;
-                $txt = isset($blk['content']) ? trim((string) $blk['content']) : '';
+                $txt = trim((string) ($blk['markdown'] ?? $blk['content'] ?? ''));
                 if ($txt !== '') {
                     $out .= str_repeat('#', $lvl) . ' ' . $txt . "\n\n";
                 }
             } elseif ($type === 'core/paragraph' || $type === 'unknown') {
-                $txt = isset($blk['content']) ? trim((string) $blk['content']) : '';
+                $txt = trim((string) ($blk['markdown'] ?? $blk['content'] ?? ''));
                 if ($txt !== '') {
                     $out .= $txt . "\n\n";
                 }
@@ -214,7 +262,8 @@ class WPCA_REST {
                 $items = isset($blk['items']) && is_array($blk['items']) ? $blk['items'] : array();
                 $ordered = !empty($blk['ordered']);
                 foreach ($items as $idx => $it) {
-                    $out .= ($ordered ? (($idx + 1) . '. ') : '- ') . $it . "\n";
+                    $prefix = $ordered ? (($idx + 1) . '. ') : '- ';
+                    $out .= $prefix . str_replace("\n", "\n" . str_repeat(' ', strlen($prefix)), $it) . "\n";
                 }
                 if (!empty($items)) {
                     $out .= "\n";
@@ -223,7 +272,12 @@ class WPCA_REST {
                 $alt = isset($blk['altText']) ? (string) $blk['altText'] : '';
                 $url = isset($blk['url']) ? (string) $blk['url'] : '';
                 if ($url !== '') {
-                    $out .= '![' . $alt . '](' . $url . ')' . "\n\n";
+                    $alt = str_replace(array('\\', '[', ']', '<', '>'), array('\\\\', '\\[', '\\]', '&lt;', '&gt;'), $alt);
+                    $url = str_replace(array(' ', '<', '>', "\r", "\n"), array('%20', '%3C', '%3E', '%0D', '%0A'), $url);
+                    $out .= '![' . $alt . '](<' . $url . '>)' . "\n\n";
+                }
+                if (isset($blk['caption']) && (string) $blk['caption'] !== '') {
+                    $out .= str_replace(array('<', '>'), array('&lt;', '&gt;'), $blk['caption']) . "\n\n";
                 }
             } elseif ($type === 'core/code') {
                 $txt = isset($blk['content']) ? (string) $blk['content'] : '';
@@ -231,7 +285,7 @@ class WPCA_REST {
                     $out .= "```\n" . $txt . "\n```\n\n";
                 }
             } elseif ($type === 'core/quote') {
-                $txt = isset($blk['content']) ? (string) $blk['content'] : '';
+                $txt = (string) ($blk['markdown'] ?? $blk['content'] ?? '');
                 if ($txt !== '') {
                     foreach (preg_split('/\r\n|\r|\n/', $txt) as $ln) {
                         $out .= '> ' . $ln . "\n";
@@ -247,32 +301,37 @@ class WPCA_REST {
     private static function if_none_match(WP_REST_Request $req, string $etag): bool {
         $header = (string) $req->get_header('if-none-match');
         if ($header === '' && isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
-            $header = trim((string) $_SERVER['HTTP_IF_NONE_MATCH']);
+            $header = (string) $_SERVER['HTTP_IF_NONE_MATCH'];
         }
-
+        $header = trim($header, " \t");
         if ($header === '') {
             return false;
         }
-
-        foreach (explode(',', $header) as $token) {
-            $token = trim($token);
-            if (stripos($token, 'W/') === 0) {
-                $token = trim(substr($token, 2));
-            }
-            if (strlen($token) >= 2 && $token[0] === '"' && substr($token, -1) === '"') {
-                $token = substr($token, 1, -1);
-            }
-            if ($token === $etag) {
-                return true;
-            }
+        if ($header === '*') {
+            return true;
         }
 
-        return false;
+        $matched = false;
+        $offset = 0;
+        $length = strlen($header);
+        while ($offset < $length) {
+            $offset += strspn($header, " \t,", $offset);
+            if ($offset === $length) {
+                break;
+            }
+            // RFC 9110 entity-tags can contain commas; backslashes do not escape quotes.
+            if (preg_match('/\G(?:W\/)?"([\x21\x23-\x7e\x80-\xff]*)"[ \t]*(?:,|\z)/', $header, $token, 0, $offset) !== 1) {
+                return false;
+            }
+            $matched = $matched || $token[1] === $etag;
+            $offset += strlen($token[0]);
+        }
+
+        return $matched;
     }
 
-    private static function add_context_headers(WP_REST_Response $resp, string $etag, $modified, string $content_type): void {
+    private static function add_context_headers(WP_REST_Response $resp, $modified, string $content_type): void {
         $resp->header('Content-Type', $content_type);
-        $resp->header('ETag', '"' . $etag . '"');
         if (!empty($modified)) {
             $timestamp = strtotime((string) $modified);
             if ($timestamp !== false) {

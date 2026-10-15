@@ -3,3 +3,13 @@ Thumbs.db
 *.log
 node_modules/
 vendor/
+/AGENTS.md
+/docs/AGENT-USAGE.md
+/tests/run-model-comparison.py
+/evidence/*
+!/evidence/etag-quoted-comma-20261015/
+/evidence/etag-quoted-comma-20261015/*
+!/evidence/etag-quoted-comma-20261015/summary.json
+!/evidence/public-0.1.1/
+/evidence/public-0.1.1/*
+!/evidence/public-0.1.1/summary.json

@@ -49,7 +49,7 @@ class WPCA_Abilities {
             'wp-context/get-post-markdown',
             array(
                 'label' => __('Get Post Markdown Context', 'wp-context-abilities'),
-                'description' => __('Returns a Markdown projection for a post or page with a deterministic ETag over the final Markdown bytes.', 'wp-context-abilities'),
+                'description' => __('Returns a Markdown projection. Its etag field identifies the markdown string, not the surrounding ability response or a separately filtered REST response.', 'wp-context-abilities'),
                 'category' => self::CATEGORY,
                 'input_schema' => self::post_id_input_schema(),
                 'output_schema' => self::markdown_output_schema(),
@@ -83,7 +83,7 @@ class WPCA_Abilities {
             'wp-context/get-changed-content',
             array(
                 'label' => __('Get Changed Content Context', 'wp-context-abilities'),
-                'description' => __('Lists content changed since a supplied ISO timestamp or cursor, including CIDs for conditional AI context refresh.', 'wp-context-abilities'),
+                'description' => __('Lists posts modified after a supplied timestamp. Best-effort discovery, not a complete change feed; related metadata changes and deletions are not tracked.', 'wp-context-abilities'),
                 'category' => self::CATEGORY,
                 'input_schema' => self::catalog_input_schema(true),
                 'output_schema' => self::catalog_output_schema(),
@@ -129,7 +129,6 @@ class WPCA_Abilities {
 
         $cid = WPCA_CID::compute($mr);
         $mr['cid'] = $cid;
-        $mr['etag'] = '"' . $cid . '"';
 
         return $mr;
     }
@@ -240,7 +239,7 @@ class WPCA_Abilities {
                     'minimum' => 1,
                     'maximum' => 100,
                     'default' => 100,
-                    'description' => 'Maximum number of items to return. Capped at 100.',
+                    'description' => 'Query page size before per-item permissions. Capped at 100. Follow next_page even when items is empty.',
                 ),
                 'page' => array(
                     'type' => 'integer',
@@ -259,7 +258,6 @@ class WPCA_Abilities {
             'properties' => array(
                 'rid' => array('type' => 'integer'),
                 'cid' => array('type' => 'string'),
-                'etag' => array('type' => 'string'),
                 'title' => array('type' => 'string'),
                 'status' => array('type' => 'string'),
                 'modified' => array('type' => array('string', 'null')),
@@ -297,6 +295,7 @@ class WPCA_Abilities {
                 'cursor' => array('type' => array('string', 'null')),
                 'page' => array('type' => 'integer'),
                 'per_page' => array('type' => 'integer'),
+                'next_page' => array('type' => array('integer', 'null')),
                 'items' => array(
                     'type' => 'array',
                     'items' => array(
@@ -316,7 +315,7 @@ class WPCA_Abilities {
                     ),
                 ),
             ),
-            'required' => array('count', 'items'),
+            'required' => array('count', 'items', 'next_page'),
             'additionalProperties' => false,
         );
     }

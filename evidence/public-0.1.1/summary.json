@@ -1,0 +1,164 @@
+{
+  "version": "0.1.1",
+  "generated_at_utc": "2026-10-15T22:13:54.302866+00:00",
+  "scope": "Publication extract from accepted retained local reports; no new test, model invocation, or hosted execution.",
+  "runtime_sha256": {
+    "wp-context-abilities.php": "24704f3d61eb2f384d7db48ec2ad688dee9e643133640ede347d04283a0e8e0f",
+    "includes/class-wpca-abilities.php": "240abdbc0b9187db29c44228e9b85c4b98152cf38a0475c217ce841fddd0db78",
+    "includes/class-wpca-cid.php": "a3afb9cf4e6dd864fb757fe2ff22550b921e3e041897850e0e2db7c7d6998b08",
+    "includes/class-wpca-mr.php": "e322e320ae6169a082428e71a65677ea1d10beb283e4a47b9bff0680a40998d1",
+    "includes/class-wpca-rest.php": "cc252464cc5386ece7bc30a77dc93077c8f93b6771f2f7ee193d694ed86d269b"
+  },
+  "focused_regressions": {
+    "report": "../etag-quoted-comma-20261015/summary.json",
+    "report_sha256": "bbe235808e0de43f1ba7f4f9745696806b1957eb371ae41269afdd2279c9ca89",
+    "checks": 69,
+    "failed": 0,
+    "new_parser_cases": 18,
+    "scope": "Real WordPress REST/parser classes with in-memory database/host doubles; no hosted requests."
+  },
+  "historical_runtime_sha256": {
+    "wp-context-abilities.php": "24704f3d61eb2f384d7db48ec2ad688dee9e643133640ede347d04283a0e8e0f",
+    "includes/class-wpca-abilities.php": "240abdbc0b9187db29c44228e9b85c4b98152cf38a0475c217ce841fddd0db78",
+    "includes/class-wpca-cid.php": "a3afb9cf4e6dd864fb757fe2ff22550b921e3e041897850e0e2db7c7d6998b08",
+    "includes/class-wpca-mr.php": "e322e320ae6169a082428e71a65677ea1d10beb283e4a47b9bff0680a40998d1",
+    "includes/class-wpca-rest.php": "99046f9989c59ba9d1a7277db8f6332490ab58f85eec8675cc7f7fc76514f74a"
+  },
+  "historical_runtime_note": "The Docker, retrieval, and model reports predate the quoted-comma parser correction; they are not full executions of the final published runtime.",
+  "historical_docker": {
+    "retained_report_sha256": "5875f0ebb382dc30e00ae3b2c8d964d3146fcec2ac6a9ba861be6e676a0e90ed",
+    "versions": {
+      "wordpress": "7.0.2",
+      "php": "8.2.33",
+      "database": "11.4.12-MariaDB-ubu2404"
+    },
+    "docker_suite_checks": 47,
+    "class_regression_checks": 51,
+    "installed_fidelity_checks": 16,
+    "all_passed": true,
+    "count_interpretation": "Separate suites with aggregate gates, not independent counts to add together."
+  },
+  "historical_retrieval_comparison": {
+    "retained_report_sha256": "d9ad3199bdc27e1ea19a2511d12ebcc2e99f008a02d41c2b2b95d39c0077abde",
+    "fixture": "One synthetic draft with ordinary core blocks and WordPress metadata.",
+    "task": "Review this unpublished draft using only the supplied context.\nReport its title, publication status, author, section heading, checklist items\nand nesting, inline image description and caption, internal link destination,\ncategory, tag, and featured image description. Flag missing information instead\nof inventing it. Then give a brief editorial assessment with evidence.",
+    "core_baseline": {
+      "route": "/wp/v2/posts/{draft}",
+      "parameters": {
+        "context": "edit",
+        "_embed": "author,wp:term,wp:featuredmedia",
+        "_fields": "id,status,title.raw,content.rendered,author,categories,tags,featured_media,_links,_embedded"
+      },
+      "reference": "https://developer.wordpress.org/rest-api/using-the-rest-api/global-parameters/"
+    },
+    "variants": {
+      "core_rest_embedded": {
+        "requests_per_collection": 1,
+        "response_body_bytes": 5701,
+        "consumer_facts_bytes": 556,
+        "facts_available": 13,
+        "facts_total": 13,
+        "unchanged_follow_up": [
+          {
+            "validator_sent": false,
+            "status": 200,
+            "body_bytes": 5701
+          }
+        ]
+      },
+      "context_mr": {
+        "requests_per_collection": 1,
+        "response_body_bytes": 2003,
+        "consumer_facts_bytes": 556,
+        "facts_available": 13,
+        "facts_total": 13,
+        "unchanged_follow_up": [
+          {
+            "validator_sent": true,
+            "status": 304,
+            "body_bytes": 0
+          }
+        ]
+      },
+      "context_mr_and_markdown": {
+        "requests_per_collection": 2,
+        "response_body_bytes": 2411,
+        "consumer_facts_bytes": 556,
+        "facts_available": 13,
+        "facts_total": 13,
+        "unchanged_follow_up": [
+          {
+            "validator_sent": true,
+            "status": 304,
+            "body_bytes": 0
+          },
+          {
+            "validator_sent": true,
+            "status": 304,
+            "body_bytes": 0
+          }
+        ]
+      }
+    },
+    "normalized_fact_artifacts_equal": true,
+    "normalized_fact_artifact": {
+      "bytes": 556,
+      "sha256": "0259808e1b53162891a7cb4758642f04bf2770bc84a2898edbffc12d27f0396b"
+    },
+    "request_count_advantage_over_core_baseline": false,
+    "core_revalidation_scope": "The Core REST response exposed no validator in this fixture; this is not a claim about every Core REST response."
+  },
+  "historical_model_pilot": {
+    "retained_report_sha256": "1569c2a3bc51ba58e28a6c7c9f4e9d009d37bcba7408e13b33ca832c44dee27c",
+    "model_requested": "gpt-6.1-sol",
+    "reasoning_effort": "low",
+    "completions_per_input": 1,
+    "total_completions": 3,
+    "same_instructions_and_schema": true,
+    "results": [
+      {
+        "variant": "core_rest_embedded",
+        "correct_facts": 13,
+        "total_facts": 13,
+        "evidence_quotes_present": [
+          true,
+          true,
+          true
+        ],
+        "grading_limit": "Exact fact values and quote presence only; comments need human assessment."
+      },
+      {
+        "variant": "context_mr",
+        "correct_facts": 13,
+        "total_facts": 13,
+        "evidence_quotes_present": [
+          true,
+          true,
+          true
+        ],
+        "grading_limit": "Exact fact values and quote presence only; comments need human assessment."
+      },
+      {
+        "variant": "normalized_control",
+        "correct_facts": 13,
+        "total_facts": 13,
+        "evidence_quotes_present": [
+          true,
+          true,
+          true
+        ],
+        "grading_limit": "Exact fact values and quote presence only; comments need human assessment."
+      }
+    ]
+  },
+  "limitations": [
+    "One synthetic draft; byte reductions are fixture-specific.",
+    "Fact equality and quote presence are not editorial-quality grading; no better AI review quality is established.",
+    "Reduced real-world integration effort and a general latency advantage remain unmeasured.",
+    "The WordPress AI core/content-query ability was not evaluated.",
+    "Link-target preservation covers paragraphs, headings, and quotes, not list items.",
+    "Timestamp-based discovery is not a complete change feed.",
+    "No hosted 0.1.1 validation or intermediary compatibility claim.",
+    "Complete historical run records remain local; their identities are provenance, not public downloadable artifacts."
+  ]
+}

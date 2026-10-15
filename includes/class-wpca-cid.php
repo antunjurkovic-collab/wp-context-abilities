@@ -3,7 +3,7 @@ if (!defined('ABSPATH')) { exit; }
 
 class WPCA_CID {
     /**
-     * Compute strong CID (sha256-<hex>) over canonical JSON of the provided associative array.
+     * Compute an application CID (not an HTTP validator) over canonical JSON.
      * Excludes volatile keys and enforces stable key ordering at all levels.
      */
     public static function compute(array $payload, array $exclude_keys = array('cid','links')): string {

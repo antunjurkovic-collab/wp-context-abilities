@@ -29,9 +29,23 @@ Direct parameters such as `?post_id=123` are not the documented call shape for a
 
 ### What was validated live?
 
-The 0.1.0 split was validated with the clean `/wp-json/wp-context/v1` route surface, no legacy `/dual-native/v1` routes, ETag/Content-Digest validators, `If-None-Match` 304 behavior, and four read-only `wp-context` abilities executing through `input[...]`.
+The historical 0.1.0 smoke run checked route availability, ETag/Content-Digest
+header presence, one `If-None-Match` 304 case, and four ability executions. It did
+not prove digest correctness, content fidelity, complete discovery, or improved
+agent outcomes. The 0.1.1 corrections have not been deployed or tested on hosts.
 
 ## Changelog
+
+### 0.1.1
+
+- Separate application CIDs from HTTP response ETags.
+- Hash and emit one response serialization, including pretty JSON and final data filters.
+- Parse complete If-None-Match entity-tags without splitting quoted commas or treating embedded asterisks as wildcards.
+- Preserve modern List/List Item content and nested list indentation in Markdown.
+- Retain inline image alt text, captions, and paragraph/heading/quote link targets in JSON and Markdown.
+- Add `next_page` so empty permission-filtered pages do not terminate discovery.
+- Limit discovery to best-effort post-timestamp filtering and clarify credential authority.
+- Add focused local regressions using WordPress REST and block-parser classes.
 
 ### 0.1.0
 
